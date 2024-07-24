@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "experiosa:block/workflow_tank" }
+  }
+}

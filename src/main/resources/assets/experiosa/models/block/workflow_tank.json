@@ -1,0 +1,12 @@
+{
+  "parent": "block/cube",
+  "textures": {
+    "particle": "experiosa:block/workflow_tank_side",
+    "down": "experiosa:block/workflow_tank_bottom",
+    "up": "experiosa:block/workflow_tank_top",
+    "north": "experiosa:block/workflow_tank_side",
+    "east": "experiosa:block/workflow_tank_side",
+    "south": "experiosa:block/workflow_tank_side",
+    "west": "experiosa:block/workflow_tank_side"
+  }
+}
