@@ -22,7 +22,7 @@ class WorkflowTankBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Ex
         markDirty()
         return addedAmount
     }
-
+    @Suppress("unused")
     fun getStoredWorkflow(): Double {
         return storedWorkflow
     }

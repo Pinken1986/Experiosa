@@ -1,13 +1,19 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "###",
-    "# #",
-    "###"
+    " P ",
+    "IGI",
+    "I I"
   ],
   "key": {
-    "#": {
-      "tag": "minecraft:logs"
+    "P": {
+      "item": "minecraft:heavy_weighted_pressure_plate"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "G": {
+      "item": "minecraft:glass"
     }
   },
   "result": {

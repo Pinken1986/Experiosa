@@ -67,4 +67,11 @@ object WorkflowSystem {
     fun getPlayerWorkflow(player: PlayerEntity): Double {
         return playerWorkflow.getOrDefault(player.uuid, 0.0)
     }
+
+    fun removePlayerWorkflow(player: PlayerEntity, amount: Double): Double {
+        val currentWorkflow = playerWorkflow.getOrDefault(player.uuid, 0.0)
+        val removedAmount = minOf(currentWorkflow, amount)
+        playerWorkflow[player.uuid] = currentWorkflow - removedAmount
+        return removedAmount
+    }
 }
