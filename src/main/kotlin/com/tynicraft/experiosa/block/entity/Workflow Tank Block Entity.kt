@@ -1,23 +1,30 @@
 package com.tynicraft.experiosa.block.entity
 
+import com.tynicraft.experiosa.Experiosa
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.nbt.NbtCompound
+import net.minecraft.network.listener.ClientPlayPacketListener
+import net.minecraft.network.packet.Packet
+import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket
 import net.minecraft.util.math.BlockPos
-import com.tynicraft.experiosa.Experiosa
 
 class WorkflowTankBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Experiosa.WORKFLOW_TANK_BLOCK_ENTITY, pos, state) {
-    var storedWorkflow: Double = 0.0
-        private set
+    private var storedWorkflow: Double = 0.0
 
-    fun addWorkflow(amount: Double) {
-        storedWorkflow += amount
+    companion object {
+        const val MAX_CAPACITY = 1000.0
     }
 
-    fun removeWorkflow(amount: Double): Double {
-        val removed = minOf(amount, storedWorkflow)
-        storedWorkflow -= removed
-        return removed
+    fun addWorkflow(amount: Double): Double {
+        val addedAmount = minOf(amount, MAX_CAPACITY - storedWorkflow)
+        storedWorkflow += addedAmount
+        markDirty()
+        return addedAmount
+    }
+
+    fun getStoredWorkflow(): Double {
+        return storedWorkflow
     }
 
     override fun writeNbt(nbt: NbtCompound) {
@@ -28,5 +35,13 @@ class WorkflowTankBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Ex
     override fun readNbt(nbt: NbtCompound) {
         super.readNbt(nbt)
         storedWorkflow = nbt.getDouble("stored_workflow")
+    }
+
+    override fun toUpdatePacket(): Packet<ClientPlayPacketListener>? {
+        return BlockEntityUpdateS2CPacket.create(this)
+    }
+
+    override fun toInitialChunkDataNbt(): NbtCompound {
+        return createNbt()
     }
 }

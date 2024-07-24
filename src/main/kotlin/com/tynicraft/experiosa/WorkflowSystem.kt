@@ -3,25 +3,28 @@ package com.tynicraft.experiosa
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents
 import net.fabricmc.fabric.api.event.player.UseBlockCallback
 import net.minecraft.block.Block
-import net.minecraft.server.network.ServerPlayerEntity
-import net.minecraft.util.math.BlockPos
+import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.registry.tag.BlockTags
+import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.util.ActionResult
-import java.util.UUID
+import net.minecraft.util.math.BlockPos
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 object WorkflowSystem {
-    private val playerWorkflows = ConcurrentHashMap<UUID, Double>()
     private val playerPlacedBlocks = ConcurrentHashMap<BlockPos, UUID>()
+    private val playerWorkflow = ConcurrentHashMap<UUID, Double>()
+    const val MAX_PLAYER_WORKFLOW = 100.0
 
     fun init() {
         registerEvents()
     }
 
     private fun registerEvents() {
-        PlayerBlockBreakEvents.AFTER.register { world, player, pos, state, _ ->
+        PlayerBlockBreakEvents.AFTER.register { _, player, pos, state, _ ->
             if (player is ServerPlayerEntity && !isPlayerPlacedBlock(pos, player.uuid)) {
-                addWorkflow(player, calculateWorkflowForBlock(state.block))
+                val workflowAmount = calculateWorkflowForBlock(state.block)
+                addWorkflowToPlayer(player, workflowAmount)
             }
         }
 
@@ -48,17 +51,20 @@ object WorkflowSystem {
         }
     }
 
-    private fun addWorkflow(player: ServerPlayerEntity, amount: Double) {
-        val currentWorkflow = getWorkflow(player)
-        setWorkflow(player, currentWorkflow + amount)
+    private fun addWorkflowToPlayer(player: ServerPlayerEntity, amount: Double) {
+        val currentWorkflow = playerWorkflow.getOrDefault(player.uuid, 0.0)
+        val newWorkflow = minOf(currentWorkflow + amount, MAX_PLAYER_WORKFLOW)
+        playerWorkflow[player.uuid] = newWorkflow
+        val stored = newWorkflow - currentWorkflow
+        val lost = amount - stored
+
+        player.sendMessage(net.minecraft.text.Text.literal("Stored $stored workflow. Current: $newWorkflow/$MAX_PLAYER_WORKFLOW"), true)
+        if (lost > 0) {
+            player.sendMessage(net.minecraft.text.Text.literal("$lost workflow was lost due to reaching capacity"), true)
+        }
     }
 
-    private fun getWorkflow(player: ServerPlayerEntity): Double {
-        return playerWorkflows.getOrDefault(player.uuid, 0.0)
-    }
-
-    private fun setWorkflow(player: ServerPlayerEntity, amount: Double) {
-        playerWorkflows[player.uuid] = amount
-        player.sendMessage(net.minecraft.text.Text.literal("Workflow: $amount"), true)
+    fun getPlayerWorkflow(player: PlayerEntity): Double {
+        return playerWorkflow.getOrDefault(player.uuid, 0.0)
     }
 }

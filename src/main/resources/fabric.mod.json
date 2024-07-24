@@ -11,7 +11,7 @@
   "environment": "client",
   "entrypoints": {
     "client": [
-      "com.tynicraft.experiosa.ExperiosaClient"
+      "com.tynicraft.experiosa.client.ExperiosaClient"
     ],
     "main": [
       "com.tynicraft.experiosa.Experiosa"
